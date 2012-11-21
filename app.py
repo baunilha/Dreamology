@@ -18,7 +18,7 @@ from flask.ext.mongoengine import mongoengine
 import models
 
 app = Flask(__name__)   # create our flask app
-
+app.config['CSRF_ENABLED'] = False
 
 
 # ---------------------------------------
