@@ -68,7 +68,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-  color: #D0D102;
+  color: #505eaa;
 }
 
 a:hover {
@@ -80,6 +80,12 @@ a:hover {
   color: #F18D05;
   font-size: 20px;
   width: 700px;
+  resize: none;
+}
+
+.comment_name {
+  color: #F18D05;
+  font-size: 20px;
   resize: none;
 }
 
