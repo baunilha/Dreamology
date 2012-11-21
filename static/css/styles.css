@@ -32,8 +32,8 @@ body {
 }
 
 p {
-  color: #DEE5DE;
-  text-align:justify;
+  color: #68563A;
+  text-align: left;
 }
 
 .site_description{
@@ -64,7 +64,7 @@ background-color: #565D5E;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #4CC4D4;
+  color: #F3773A;
 }
 
 a {

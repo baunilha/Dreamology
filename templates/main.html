@@ -15,7 +15,7 @@
 
 	<div class="span12">
 		{% for dream_post in dreams %}
-			<h3><a href="/dream/{{ dream_post.slug }}">{{ course.title }}</a></h3>
+			<h3><a href="/dream/{{ dream_post.slug }}">{{ dream_post.title }}</a></h3>
 			<p>by {{ dream_post.postedby }}</p>
 			<p>{% for cat in dream_post.categories %}
 				<span class="label label-inverse"><a href="/category/{{ cat }}">{{ cat|replace("_"," ")}}</a></span>
