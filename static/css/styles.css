@@ -24,7 +24,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#8189c3', end
 
 body {
   background-color: #FBF7F0;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .pageheader {
@@ -34,6 +34,8 @@ body {
 p {
   color: #68563A;
   text-align: left;
+  font-family: Georgia, "Book Antiqua", Palatino, "Palatino Linotype", "Palatino LT STD", serif;
+  line-height: 30px;
 }
 
 .site_description{
@@ -65,6 +67,7 @@ background-color: #565D5E;
 
 h1, h2, h3, h4, h5, h6 {
   color: #F3773A;
+  font-family: "Arial Rounded MT Bold", "Helvetica Rounded", Arial, sans-serif;
 }
 
 a {
