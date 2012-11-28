@@ -1,3 +1,7 @@
+# -----------------------------
+# --------- Libraries ---------
+# -----------------------------
+
 # -*- coding: utf-8 -*-
 import os, datetime, re
 from flask import Flask, request, render_template, redirect, abort
@@ -9,133 +13,168 @@ from flask.ext.mongoengine import mongoengine
 # import data models
 import models
 
-# Amazon AWS library
-import boto
-
-# Python Image Library
-import StringIO
-
-
 app = Flask(__name__)   # create our flask app
-app.secret_key = os.environ.get('SECRET_KEY') # put SECRET_KEY variable inside .env file with a random string of alphanumeric characters
-app.config['CSRF_ENABLED'] = False
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 megabyte file upload
 
+
+
+# ---------------------------------------
 # --------- Database Connection ---------
+# ---------------------------------------
+
 # MongoDB connection to MongoLab's database
 mongoengine.connect('mydata', host=os.environ.get('MONGOLAB_URI'))
 app.logger.debug("Connecting to MongoLabs")
 
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
+# -----------------------------
+# ----------- Lists -----------
+# -----------------------------
+
+# Create the lists that match the name of the ListField in the models.py
+categories = ['fairy tales', 'fantasy', 'mystery', 'real stories', 'romance', 'sci-fi', 'suspense']
+
+
+
+# ---------------------------
 # --------- Routes ----------
+# ---------------------------
+
 
 # this is our main page
 @app.route("/", methods=['GET','POST'])
 def index():
 
-	# get Idea form from models.py
-	photo_upload_form = models.photo_upload_form(request.form)
+	all_dreams = models.Dreamology.objects.order_by('-timestamp')
+
+	return render_template("main.html", dreams=all_dreams)
+
+
+
+# this is the Page to Submit NEW Dreams
+@app.route("/submit", methods=['GET','POST'])
+def submit():
+
+	app.logger.debug(request.form.getlist('categories'))
+
+	# get Dreamology form from models.py
+	dreamology_form = models.dreamm_form(request.form)
 	
-	# if form was submitted and it is valid...
-	if request.method == "POST" and photo_upload_form.validate():
+	if request.method == "POST" and dreamology_form.validate():
+	
+		now = datetime.datetime.now()
+
+	# get form data - create new dream post
+		dream_post = models.Dreamology()
 		
-		uploaded_file = request.files['fileupload']
-		# app.logger.info(file)
-		# app.logger.info(file.mimetype)
-		# app.logger.info(dir(file))
-		
-		# Uploading is fun
-		# 1 - Generate a file name with the datetime prefixing filename
-		# 2 - Connect to s3
-		# 3 - Get the s3 bucket, put the file
-		# 4 - After saving to s3, save data to database
+		dream_post.title = request.form.get('title')
+		dream_post.dream = request.form.get('dream','')
+		dream_post.postedby = request.form.get('postedby')
+		dream_post.tags = request.form.get('tags')
+		dream_post.slug = slugify(dream_post.title + "-" + now.strftime("%f"))
+	
+		dream_post.save()
 
-		if uploaded_file and allowed_file(uploaded_file.filename):
-			# create filename, prefixed with datetime
-			now = datetime.datetime.now()
-			filename = now.strftime('%Y%m%d%H%M%s') + "-" + secure_filename(uploaded_file.filename)
-			# thumb_filename = now.strftime('%Y%m%d%H%M%s') + "-" + secure_filename(uploaded_file.filename)
-
-			# connect to s3
-			s3conn = boto.connect_s3(os.environ.get('AWS_ACCESS_KEY_ID'),os.environ.get('AWS_SECRET_ACCESS_KEY'))
-
-			# open s3 bucket, create new Key/file
-			# set the mimetype, content and access control
-			b = s3conn.get_bucket(os.environ.get('AWS_BUCKET')) # bucket name defined in .env
-			k = b.new_key(b)
-			k.key = filename
-			k.set_metadata("Content-Type", uploaded_file.mimetype)
-			k.set_contents_from_string(uploaded_file.stream.read())
-			k.make_public()
-
-			# save information to MONGO database
-			# did something actually save to S3
-			if k and k.size > 0:
-				
-				submitted_image = models.Image()
-				submitted_image.title = request.form.get('title')
-				submitted_image.description = request.form.get('description')
-				submitted_image.postedby = request.form.get('postedby')
-				submitted_image.filename = filename # same filename of s3 bucket file
-				submitted_image.save()
-
-
-			return redirect('/')
-
-		else:
-			return "uhoh there was an error " + uploaded_file.filename
-
-
+		return redirect('/dream/%s' % dream_post.slug)
 
 	else:
-		# get existing images
-		images = models.Image.objects.order_by('-timestamp')
-		
-		# render the template
+
+		if request.form.getlist('categories'):
+			for c in request.form.getlist('categories'):
+				dreamology_form.categories.append_entry(c)
+
 		templateData = {
-			'images' : images,
-			'form' : photo_upload_form
+			'dreams' : models.Dreamology.objects(),
+			'categories' : categories,
+			'form' : dreamology_form
 		}
 
-		return render_template("main.html", **templateData)
+		return render_template("submit.html", **templateData)
 
-@app.route('/delete/<imageid>')
-def delete_image(imageid):
+
+# Dreams Page
+@app.route("/dream/<dream_post_slug>")
+def dream_display(dream_post_slug):
+
+	# get dream by dream_post_slug
+	try:
+		dream_post = models.Dreamology.objects.get(slug=dream_post_slug)
+	except:
+		abort(404)
+
+	tag_str = ", ".join(dream_post.tags)
+
+	# prepare template data
+	templateData = {
+		'dream_post' : dream_post,
+		'tags' : tag_str
+	}
+
+	# render and return the template
+	return render_template('idea_entry.html', **templateData)
+
+
+# Comments Page
+@app.route("/dream/<dream_id>/comment", methods=['POST'])
+def dream_comment(dream_id):
+
+	name = request.form.get('name')
+	comment = request.form.get('comment')
+
+	if name == '' or comment == '':
+		# no name or comment, return to page
+		return redirect(request.referrer)
+
+	#get the dreams by id
+	try:
+		dream_post = models.Dreamology.objects.get(id=dream_id)			
+
+	except:
+		# error, return to where you came from
+		return redirect(request.referrer)
+
+
+	# create comment
+	commentary = models.Comment()
+	commentary.name = request.form.get('name')
+	commentary.comment = request.form.get('comment')
 	
-	image = models.Image.objects.get(id=imageid)
-	if image:
+	# append comment to dream
+	dream_post.comments.append(commentary)
 
-		# delete from s3
-	
-		# connect to s3
-		s3conn = boto.connect_s3(os.environ.get('AWS_ACCESS_KEY_ID'),os.environ.get('AWS_SECRET_ACCESS_KEY'))
+	# save it
+	dream_post.save()
 
-		# open s3 bucket, create new Key/file
-		# set the mimetype, content and access control
-		bucket = s3conn.get_bucket(os.environ.get('AWS_BUCKET')) # bucket name defined in .env
-		k = bucket.new_key(bucket)
-		k.key = image.filename
-		bucket.delete_key(k)
+	return redirect('/dream/%s' % dream_post.slug)
 
-		# delete from Mongo	
-		image.delete()
 
-		return redirect('/')
 
-	else:
-		return "Unable to find requested image in database."
+# ----------------------------
+# --------- Helpers ----------
+# ----------------------------
 
+# Handle Errors
 @app.errorhandler(404)
 def page_not_found(error):
     return render_template('404.html'), 404
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.lower().rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+# Slugify the title to create URLS
+# via http://flask.pocoo.org/snippets/5/
+_punct_re = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+def slugify(text, delim=u'-'):
+	"""Generates an ASCII-only slug."""
+	result = []
+	for word in _punct_re.split(text.lower()):
+		result.extend(unidecode(word).split())
+	return unicode(delim.join(result))
+
+
+
+# ------------------------------
 # --------- Server On ----------
+# ------------------------------
+
 # start the webserver
 if __name__ == "__main__":
 	app.debug = True

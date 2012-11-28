@@ -1,0 +1,86 @@
+{% extends "/layout.html" %}
+{% from "_form_helpers.html" import render_error, render_textarea %}
+
+{% block styles %}{% endblock %}
+
+{% block body %}
+
+<div class="row">
+
+	<!-- left column -->
+	<div class="span12">
+		<br/>
+		<br/>
+		<h1>{{ dream_post.title }}</h1>
+		<p>by {{ dream_post.postedby }}</p>
+		<br>
+		<p><small><em>--- Added: {{ dream_post.timestamp.strftime("%a %m/%d %I:%M%p ") }}</em></small></p>
+		<hr>
+		<br/>
+		<p>{{ dream_post.dream }}</p>
+		<br/>
+
+		<h3>Categories:</h3>
+			<br/>
+			<p>{% for cat in dream_post.categories %}
+				<span class="labelnew label-inverse"><a href="/category/{{ cat }}">{{ cat|replace("_"," ")}}</a></span>
+			{% endfor %}</p>
+
+		<br/>
+
+		<h3>Tags:</h3>
+				<span class="labelnew label-inverse">{{ dream_post.tags }}</span>
+		
+		<br/>
+		<hr>	
+		<br/>
+
+		<!-- ADD COMMENT -->
+			<div class="span12">
+				<h3> Comments for this Dream: </h3>
+				<form method="POST" action="/dream/{{ dream_post.id }}/comment">
+					
+					<label for="name"><h3 class="comment3">Name/Nickname:</h3></label>
+					<textarea type="text" cols="60" rows="3" id="name" name="name" class="comment3"></textarea>
+					
+					<label for="comment"><h3 class="comment3">How did you continue this dream?</h3></label>
+					<textarea type="text" cols="100" rows="5" id="comment" name="comment" class="comment3"></textarea>
+					
+					<label>
+					<button type="submit" class="btn btn-info">Comment</button>
+					</label>
+					<hr>
+				</form>
+			</div>
+
+		<br/>
+		<br/>
+
+			<div class="span11">
+			<!-- DISPLAY COMMENTS -->
+			<h3> Comments about this Dream ( {{ dream_post.comments|length }} ):</h3>
+				{% for commentary in dream_post.comments %}
+				<div class="comment">
+					<span class="commenter">
+						<h3 class="review_count">Option {{ loop.index }}:</h3>
+						<h4 class="comment3">|| Continued like this:</h4> 
+						<p> {{ commentary.comment }} </p> </span>
+					<br>
+					<h4 class="comment3">By: </h4>
+					<p>{{ commentary.name }}</p>
+					<br>
+					<p><small><em>--- Added: {{ commentary.timestamp.strftime("%a %m/%d %I:%M%p ") }}</em></small></p>
+				</div>
+				</hr>
+				{% endfor %}
+
+		</div>
+		
+
+	</div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}{% endblock %}

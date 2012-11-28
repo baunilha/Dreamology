@@ -10,32 +10,23 @@ class Comment(mongoengine.EmbeddedDocument):
 	comment = mongoengine.StringField()
 	timestamp = mongoengine.DateTimeField(default=datetime.now())
 
-class Image(mongoengine.Document):
+class Dreamology(mongoengine.Document):
 
 	title = mongoengine.StringField(max_length=120, required=True)
-	description = mongoengine.StringField()
+	slug = mongoengine.StringField()
+	dream = mongoengine.StringField()
 	postedby = mongoengine.StringField(max_length=120, required=True, verbose_name="Your name")
 	
+	categories = mongoengine.ListField( StringField() )
 	tags = mongoengine.ListField( mongoengine.StringField())
-
-	filename = mongoengine.StringField()
 
 	# Comments is a list of Document type 'Comments' defined above
 	comments = mongoengine.ListField( mongoengine.EmbeddedDocumentField(Comment) )
 
-	# Timestamp will record the date and time idea was created.
+	# Timestamp will record the date and time dream was created.
 	timestamp = mongoengine.DateTimeField(default=datetime.now())
 
-
-photo_form = model_form(Image)
-
-# Create a WTForm form for the photo upload.
-# This form will inhirit the Photo model above
-# It will have all the fields of the Photo model
-# We are adding in a separate field for the file upload called 'fileupload'
-class photo_upload_form(photo_form):
-	fileupload = FileField('Upload an image file', validators=[])
-
+dreamm_form = model_form(Dreamology)
 
 	
 

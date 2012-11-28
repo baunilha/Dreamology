@@ -1,0 +1,69 @@
+{% extends "/main.html" %}
+{% from "_form_helpers.html" import render_error, render_textarea %}
+
+{% block styles %}{% endblock %}
+
+{% block body %}
+
+      <!-- Submit a new class form -->
+    <div class="container middle">
+      	<div class="row-fluid">
+            
+            <form method='POST' action="/submit">
+                <legend><h3>Create a Dream:</h3></legend>
+
+                <p>
+                <label for="title">Title</label>
+                {{ form.title(class='myTextboxCssClass', type='textarea') }}
+                {{ render_error(form.title) }}  {# render_error inside _form_helpers.html #}
+                </p>     
+        </div> 
+
+        <div class="row-fluid">
+                <p>
+                <label for="postedby">Creator</label>
+                {{ form.postedby(class='myTextboxCssClass', type='textarea') }}
+                {{ render_error(form.postedby) }}  {# render_error inside _form_helpers.html #}
+                </p>
+        </div>
+
+        <div class="row-fluid">
+                <p>
+                <label>Categories</label>
+                <em><span class="help-block">(Select as many as you need)</span></em>
+
+                {# comment - loop through categories and create checkboxes #}
+                {% for c in categories|sort %}
+                <label class="checkbox">
+                <input type="checkbox" name="categories" value="{{ c|replace(" ","_") }}" {% if c|replace(" ","_") in form.categories.data %}checked=checked{% endif %} > {{ c|title }}
+                </label>
+                {% endfor %}
+                </p>
+        </div>
+
+        <div class="row-fluid">
+                <br>
+                <label for="dream">New Dream</label>
+                {{ render_textarea(form.dream, cols="50", rows="6") }} {# render_textarea inside _form_helpers.html #}
+                {{ render_error(form.dream) }} {# render_error inside _form_helpers.html #}
+        </div>
+
+        <div class="row-fluid">
+                <p>
+                <label for="tags">Tags</label>
+                {{ form.tags(class='myTextboxCssClass', type='textarea') }}
+                {{ render_error(form.tags) }}  {# render_error inside _form_helpers.html #}
+                </p>
+        </div>
+
+                
+                <button type="submit" class="btn btn-info btn-large">Add Dream</button>
+          </form>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}{% endblock %}

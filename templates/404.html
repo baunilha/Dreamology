@@ -1,5 +1,12 @@
-{% extends "layout/main.html" %}
+{% extends "/layout.html" %}
 
+{% block styles %}
+<style>
+img.confirm {
+    width: 300px;
+}
+</style>
+{% endblock %}
 
 {% block body %}
 
@@ -12,5 +19,3 @@
             </ul>
 
 {% endblock %}
-
-{% block styles %}{% endblock %}
