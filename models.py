@@ -1,32 +1,31 @@
 # -*- coding: utf-8 -*-
+from mongoengine import *
+
 from flask.ext.mongoengine.wtf import model_form
-from wtforms.fields import * # for our custom signup form
-from flask.ext.mongoengine.wtf.orm import validators
-from flask.ext.mongoengine import *
 from datetime import datetime
 
-class Comment(mongoengine.EmbeddedDocument):
-	name = mongoengine.StringField()
-	comment = mongoengine.StringField()
-	timestamp = mongoengine.DateTimeField(default=datetime.now())
+class Comment(EmbeddedDocument):
+	name = StringField()
+	comment = StringField()
+	timestamp = DateTimeField(default=datetime.now())
 
-class Dreamology(mongoengine.Document):
+class Dreamology(Document):
 
-	title = mongoengine.StringField(max_length=120, required=True)
-	slug = mongoengine.StringField()
-	dream = mongoengine.StringField()
-	postedby = mongoengine.StringField(max_length=120, required=True, verbose_name="Your name")
+	title = StringField(max_length=120, required=True)
+	slug = StringField()
+	dream = StringField()
+	postedby = StringField(max_length=120, required=True, verbose_name="Your name")
 	
-	categories = mongoengine.ListField( StringField() )
-	tags = mongoengine.ListField( mongoengine.StringField())
+	categories = ListField( StringField() )
+	tags = StringField(max_length=120, required=False)
 
 	# Comments is a list of Document type 'Comments' defined above
-	comments = mongoengine.ListField( mongoengine.EmbeddedDocumentField(Comment) )
+	comments = ListField( EmbeddedDocumentField(Comment) )
 
 	# Timestamp will record the date and time dream was created.
-	timestamp = mongoengine.DateTimeField(default=datetime.now())
+	timestamp = DateTimeField(default=datetime.now())
 
-dreamm_form = model_form(Dreamology)
+DreamologyForm = model_form(Dreamology)
 
 	
 

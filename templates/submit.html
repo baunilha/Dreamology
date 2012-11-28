@@ -26,6 +26,7 @@
                 {{ render_error(form.postedby) }}  {# render_error inside _form_helpers.html #}
                 </p>
         </div>
+        <br>
 
         <div class="row-fluid">
                 <p>
@@ -44,10 +45,11 @@
         <div class="row-fluid">
                 <br>
                 <label for="dream">New Dream</label>
-                {{ render_textarea(form.dream, cols="50", rows="6") }} {# render_textarea inside _form_helpers.html #}
+                {{ render_textarea(form.dream, cols="500", rows="10") }} {# render_textarea inside _form_helpers.html #}
                 {{ render_error(form.dream) }} {# render_error inside _form_helpers.html #}
         </div>
 
+        <br>
         <div class="row-fluid">
                 <p>
                 <label for="tags">Tags</label>
@@ -56,11 +58,11 @@
                 </p>
         </div>
 
-                
+                <br>
                 <button type="submit" class="btn btn-info btn-large">Add Dream</button>
           </form>
 
-        </div>
+    
     </div>
 
 {% endblock %}

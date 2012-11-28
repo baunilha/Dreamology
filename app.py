@@ -4,10 +4,14 @@
 
 # -*- coding: utf-8 -*-
 import os, datetime, re
+from unidecode import unidecode
+
+from flask import jsonify
+
 from flask import Flask, request, render_template, redirect, abort
-from werkzeug import secure_filename
 
 # import all of mongoengine
+# from mongoengine import *
 from flask.ext.mongoengine import mongoengine
 
 # import data models
@@ -58,7 +62,7 @@ def submit():
 	app.logger.debug(request.form.getlist('categories'))
 
 	# get Dreamology form from models.py
-	dreamology_form = models.dreamm_form(request.form)
+	dreamology_form = models.DreamologyForm(request.form)
 	
 	if request.method == "POST" and dreamology_form.validate():
 	
